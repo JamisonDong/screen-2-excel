@@ -15,18 +15,28 @@ from .ocr import image_to_table_htmls
 
 
 def _clipboard_to_png() -> str:
-    """把 macOS 剪贴板中的图片导出为临时 PNG 文件。"""
+    """把系统剪贴板中的图片导出为临时 PNG 文件（支持 macOS / Windows）。"""
     tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
     tmp.close()
-    script = (
-        "set pngData to the clipboard as «class PNGf»\n"
-        f"set fp to open for access POSIX file \"{tmp.name}\" with write permission\n"
-        "write pngData to fp\n"
-        "close access fp"
-    )
-    r = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
-    if r.returncode != 0:
-        raise SystemExit("读取剪贴板失败（剪贴板里没有图片？）: " + r.stderr.strip())
+    if sys.platform == "darwin":
+        script = (
+            "set pngData to the clipboard as «class PNGf»\n"
+            f"set fp to open for access POSIX file \"{tmp.name}\" with write permission\n"
+            "write pngData to fp\n"
+            "close access fp"
+        )
+        r = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
+        if r.returncode != 0:
+            raise SystemExit("读取剪贴板失败（剪贴板里没有图片？）: " + r.stderr.strip())
+    elif sys.platform == "win32":
+        from PIL import ImageGrab
+
+        img = ImageGrab.grabclipboard()
+        if img is None:
+            raise SystemExit("读取剪贴板失败：剪贴板里没有图片")
+        img.save(tmp.name, "PNG")
+    else:
+        raise SystemExit(f"--clipboard 暂不支持当前平台（{sys.platform}），请改用图片文件路径")
     return tmp.name
 
 
