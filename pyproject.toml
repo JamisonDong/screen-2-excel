@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "screen-2-excel"
+version = "0.1.0"
+description = "把表格截图一键转成 Excel（本地 PaddleOCR，无需大模型）"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+license = { text = "MIT" }
+dependencies = [
+    "paddlepaddle>=3.0",
+    "paddleocr>=3.0",
+    "paddlex[ocr]>=3.0",
+    "openpyxl>=3.1",
+]
+
+[project.scripts]
+screen2excel = "screen2excel.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/screen2excel"]

@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# 虚拟环境
+.venv/
+
+# 输出物
+output/
+*.xlsx
+*.xls
+
+# 系统
+.DS_Store
