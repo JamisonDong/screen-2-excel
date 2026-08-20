@@ -2,7 +2,7 @@
 
 把表格截图一键转成 Excel（`.xlsx`）。
 
-基于 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 的 PP-StructureV3 表格识别管线，**纯本地运行：不调用大模型、不需要 API Key、识别过程零网络请求，截图数据不出本机**。
+基于 [RapidTable](https://github.com/RapidAI/RapidTable)（SLANet_plus 表格结构识别，ONNX Runtime 推理）+ RapidOCR 中文识别，**纯本地运行：不调用大模型、不需要 API Key、识别过程零网络请求，截图数据不出本机**。
 
 ## 特性
 
@@ -16,14 +16,14 @@
 ## 原理
 
 ```
-截图 → PP-StructureV3（版面分析 + 表格结构识别 + 单元格 OCR）→ HTML 表格 → openpyxl → .xlsx
+截图 → RapidTable（SLANet_plus 表格结构识别 + RapidOCR 单元格文字识别，ONNX Runtime）→ HTML 表格 → openpyxl → .xlsx
 ```
 
-已默认关闭公式/印章/图表/文档方向矫正等与截图表格无关的子管线，减少模型体积与耗时。
+识别模型（SLANet_plus 约 7 MB + RapidOCR 默认中文模型）随 Python 包内置，**首次使用无需下载模型，装完即可离线使用**。注意：整图按一个表格处理，适合"整张截图就是一个表格"的场景；截图里表格占比很小或有多张表时，建议先裁切。
 
 ## 安装
 
-支持 macOS（Intel / Apple Silicon）和 Windows x64。要求 Python 3.10–3.13（paddlepaddle 暂不支持 3.14）。推荐用 [uv](https://docs.astral.sh/uv/) 管理环境。
+支持 macOS（Intel / Apple Silicon）和 Windows x64。推荐 Python 3.10–3.13，用 [uv](https://docs.astral.sh/uv/) 管理环境。
 
 macOS / Linux:
 
@@ -43,7 +43,7 @@ uv venv --python 3.12 .venv; uv pip install -e .
 # 或者 pip: py -3.12 -m venv .venv; .venv\Scripts\pip install -e .
 ```
 
-依赖体积：Python 包约 700 MB；首次运行时模型自动下载到 `~/.paddlex`（Windows 为 `C:\Users\<你>\.paddlex`），约 1 GB，下载一次后永久离线可用。
+全部依赖（含模型）约 200 MB，无大型模型下载步骤。
 
 ## 用法
 
@@ -62,10 +62,7 @@ screen2excel --clipboard -o result.xlsx
 
 ## 离线部署
 
-识别本身完全离线。要在无网机器上运行，只需在一台有网机器上安装并运行一次（触发模型下载），然后把模型目录整体拷到目标机器同一位置：
-
-- macOS / Linux：`~/.paddlex`
-- Windows：`C:\Users\<用户名>\.paddlex`
+识别模型随 Python 包内置，无额外模型目录。离线机器只需把项目 clone 和依赖安装好（可用 `uv pip download` / `pip download` 在有网机器上打包 wheel 再拷贝安装），之后即可完全离线运行。
 
 ## 常见问题
 
